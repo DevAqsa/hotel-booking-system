@@ -5,10 +5,10 @@ import pandas as pd
 
 app = FastAPI()
 
-# CORS - allows React to talk to this backend (like cors in Express)
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # React default port
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -19,8 +19,16 @@ df = pd.read_csv("hotels.csv", dtype={"id": str, "name": str})
 df_cards = pd.read_csv("cards.csv", dtype=str).to_dict(orient="records")
 df_cards_security = pd.read_csv("card_security.csv", dtype=str)
 
+# Load users - CREATE users.csv first!
+try:
+    df_users = pd.read_csv("users.csv", dtype=str)
+except:
+    # Create empty users file if doesn't exist
+    df_users = pd.DataFrame(columns=["username", "password", "name"])
+    df_users.to_csv("users.csv", index=False)
 
-# ============ YOUR CLASSES (same logic) ============
+
+# ============ YOUR EXISTING CLASSES ============
 
 class Hotel:
     def __init__(self, hotel_id):
@@ -42,14 +50,14 @@ class CreditCard:
         self.number = number
 
     def validate(self, expiration, holder, cvc):
-        # Check each card manually (more reliable than dict comparison)
         for card in df_cards:
             if (card["number"].strip() == self.number.strip() and
-                card["expiration"].strip() == expiration.strip() and
-                card["holder"].strip() == holder.strip() and
-                card["cvc"].strip() == cvc.strip()):
+                    card["expiration"].strip() == expiration.strip() and
+                    card["holder"].strip() == holder.strip() and
+                    card["cvc"].strip() == cvc.strip()):
                 return True
         return False
+
 
 class SecureCreditCard(CreditCard):
     def authenticate(self, given_password):
@@ -59,7 +67,7 @@ class SecureCreditCard(CreditCard):
         return password == given_password
 
 
-# ============ PYDANTIC MODELS (like TypeScript interfaces) ============
+# ============ PYDANTIC MODELS ============
 
 class BookingRequest(BaseModel):
     hotel_id: str
@@ -71,58 +79,116 @@ class BookingRequest(BaseModel):
     card_password: str
 
 
-# ============ API ENDPOINTS (like Express routes) ============
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class SignupRequest(BaseModel):
+    username: str
+    password: str
+    name: str
+
+
+# ============ AUTH ENDPOINTS ============
+
+@app.post("/auth/login")
+def login(request: LoginRequest):
+    global df_users
+    df_users = pd.read_csv("users.csv", dtype=str)
+
+    user = df_users[
+        (df_users["username"] == request.username) &
+        (df_users["password"] == request.password)
+        ]
+
+    if user.empty:
+        raise HTTPException(status_code=401, detail="Invalid username or password")
+
+    return {
+        "success": True,
+        "user": {
+            "username": request.username,
+            "name": user.iloc[0]["name"]
+        }
+    }
+
+
+@app.post("/auth/signup")
+def signup(request: SignupRequest):
+    global df_users
+    df_users = pd.read_csv("users.csv", dtype=str)
+
+    # Check if username exists
+    if request.username in df_users["username"].values:
+        raise HTTPException(status_code=400, detail="Username already exists")
+
+    # Add new user
+    new_user = pd.DataFrame([{
+        "username": request.username,
+        "password": request.password,
+        "name": request.name
+    }])
+
+    df_users = pd.concat([df_users, new_user], ignore_index=True)
+    df_users.to_csv("users.csv", index=False)
+
+    return {
+        "success": True,
+        "user": {
+            "username": request.username,
+            "name": request.name
+        }
+    }
+
+
+# ============ HOTEL ENDPOINTS ============
+
+@app.get("/")
+def root():
+    return {"message": "Hotel Booking API", "status": "running"}
+
 
 @app.get("/hotels")
 def get_hotels():
-    """Get all hotels - reload CSV each time"""
     df_fresh = pd.read_csv("hotels.csv", dtype={"id": str, "name": str})
     hotels = df_fresh.to_dict(orient="records")
     return {"hotels": hotels}
 
+
+@app.get("/hotels/featured")
+def get_featured_hotels():
+    """Get featured hotels for landing page"""
+    df_fresh = pd.read_csv("hotels.csv", dtype={"id": str, "name": str})
+    hotels = df_fresh.head(3).to_dict(orient="records")
+    return {"hotels": hotels}
+
+
 @app.get("/hotels/{hotel_id}")
 def get_hotel(hotel_id: str):
-    """Get single hotel by ID"""
     hotel_data = df[df["id"] == hotel_id].to_dict(orient="records")
     if not hotel_data:
         raise HTTPException(status_code=404, detail="Hotel not found")
     return hotel_data[0]
 
+
 @app.post("/book")
 def book_hotel(booking: BookingRequest):
     global df
 
-    # Reload CSV to get fresh data
     df = pd.read_csv("hotels.csv", dtype={"id": str, "name": str})
-
     hotel = Hotel(booking.hotel_id)
 
-    # Check availability
     if not hotel.available():
         raise HTTPException(status_code=400, detail="Hotel is not available")
 
-    # DEBUG: Print what we're comparing
-    print("=== DEBUG ===")
-    print("Received card data:")
-    print(f"  number: '{booking.card_number}'")
-    print(f"  expiration: '{booking.card_expiration}'")
-    print(f"  holder: '{booking.card_holder}'")
-    print(f"  cvc: '{booking.card_cvc}'")
-    print("Cards in CSV:")
-    for card in df_cards:
-        print(f"  {card}")
-    print("=============")
-
-    # Validate card
     card = SecureCreditCard(number=booking.card_number)
     if not card.validate(booking.card_expiration, booking.card_holder, booking.card_cvc):
         raise HTTPException(status_code=400, detail="Invalid card details")
 
-    # Authenticate
     if not card.authenticate(booking.card_password):
         raise HTTPException(status_code=400, detail="Card authentication failed")
 
-    # Book the hotel
     hotel.book()
 
     return {
