@@ -1,4 +1,16 @@
-id,name,city,capacity,available
-134,Tourist Sunny Apartment,Anchorage,4,no
-188,Snow Palace,New Delhi,5,no
-655,City Break Inn,Porto-Novo,3,yes
+id,name,city,capacity,available,price_per_night,rating,room_type
+134,Tourist Sunny Apartment,Anchorage,4,yes,120,4.5,standard
+135,Tourist Sunny Apartment,Anchorage,2,yes,200,4.5,deluxe
+136,Tourist Sunny Apartment,Anchorage,4,yes,350,4.5,suite
+188,Snow Palace,New Delhi,5,yes,85,4.2,standard
+189,Snow Palace,New Delhi,3,yes,150,4.2,deluxe
+190,Snow Palace,New Delhi,6,yes,280,4.2,suite
+655,City Break Inn,Porto-Novo,3,yes,95,4.0,standard
+656,City Break Inn,Porto-Novo,2,yes,160,4.0,deluxe
+657,City Break Inn,Porto-Novo,4,yes,300,4.0,suite
+700,Ocean View Resort,Miami,4,yes,180,4.8,standard
+701,Ocean View Resort,Miami,2,yes,280,4.8,deluxe
+702,Ocean View Resort,Miami,6,yes,450,4.8,suite
+800,Mountain Lodge,Denver,6,yes,110,4.3,standard
+801,Mountain Lodge,Denver,4,yes,190,4.3,deluxe
+802,Mountain Lodge,Denver,8,yes,320,4.3,suite
