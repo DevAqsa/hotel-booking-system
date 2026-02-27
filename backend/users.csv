@@ -1,4 +1,5 @@
-username,password,name
-john,john123,John Doe
-jane,jane123,Jane Doe
-YourwayStore1@gmail.com,aqsawerty,test
+username,password,name,email,phone
+john,john123,John Doe,john@email.com,0000000000
+jane,jane123,Jane Doe,jane@email.com,0000000000
+YourwayStore1@gmail.com,aqsawerty,test,test@email.com,0000000000
+aqsa,aqsa123,Aqsa,aqsa@email.com,0000000000

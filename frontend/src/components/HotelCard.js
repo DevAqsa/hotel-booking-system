@@ -1,23 +1,58 @@
 function HotelCard({ hotel, onSelect, isWishlisted, onWishlistToggle, user }) {
   const isAvailable = hotel.available === "yes";
 
-  // Hotel images based on hotel name (you can replace with real images later)
-  const getHotelImage = (name) => {
+  // Different images for each hotel listing based on ID
+  const getHotelImage = (id, name, roomType) => {
     const images = {
-      "Tourist Sunny Apartment": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop",
-      "Snow Palace": "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&h=300&fit=crop",
-      "City Break Inn": "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop",
-      "Ocean View Resort": "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=400&h=300&fit=crop",
-      "Mountain Lodge": "https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=400&h=300&fit=crop"
+      // Tourist Sunny Apartment
+      "134": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop",
+      "135": "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=400&h=300&fit=crop",
+      "136": "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=400&h=300&fit=crop",
+      // Snow Palace
+      "188": "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&h=300&fit=crop",
+      "189": "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=400&h=300&fit=crop",
+      "190": "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=400&h=300&fit=crop",
+      // City Break Inn
+      "655": "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop",
+      "656": "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=400&h=300&fit=crop",
+      "657": "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=300&fit=crop",
+      // Ocean View Resort
+      "700": "https://images.unsplash.com/photo-1573052905904-34ad8c27f0cc?w=400&h=300&fit=crop",
+      "701": "https://images.unsplash.com/photo-1540541338287-41700207dee6?w=400&h=300&fit=crop",
+      "702": "https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=400&h=300&fit=crop",
+      // Mountain Lodge
+      "800": "https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=400&h=300&fit=crop",
+      "801": "https://images.unsplash.com/photo-1587061949409-02df41d5e562?w=400&h=300&fit=crop",
+      "802": "https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=400&h=300&fit=crop"
     };
-    return images[name] || "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=400&h=300&fit=crop";
+
+    // Return image by ID, or fallback to a random one based on ID number
+    if (images[id]) {
+      return images[id];
+    }
+
+    // Fallback images array
+    const fallbackImages = [
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=400&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=400&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=400&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=400&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=400&h=300&fit=crop"
+    ];
+
+    // Use ID to pick a consistent fallback image
+    const index = parseInt(id) % fallbackImages.length;
+    return fallbackImages[index];
   };
 
   return (
     <div className={`hotel-card ${!isAvailable ? "unavailable" : ""}`}>
       <div className="card-header">
         <img
-          src={getHotelImage(hotel.name)}
+          src={getHotelImage(hotel.id, hotel.name, hotel.room_type)}
           alt={hotel.name}
           className="hotel-image"
         />

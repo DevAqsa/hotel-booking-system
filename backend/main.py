@@ -26,7 +26,10 @@ def load_hotels():
 
 def load_users():
     try:
-        return pd.read_csv("users.csv", dtype=str)
+        df = pd.read_csv("users.csv", dtype=str)
+        # Fill NaN values with empty strings
+        df = df.fillna("")
+        return df
     except:
         df = pd.DataFrame(columns=["username", "password", "name", "email", "phone"])
         df.to_csv("users.csv", index=False)
@@ -145,14 +148,15 @@ def login(request: LoginRequest):
     if user.empty:
         raise HTTPException(status_code=401, detail="Invalid username or password")
 
-    user_data = user.iloc[0].to_dict()
+    user_data = user.iloc[0]
+
     return {
         "success": True,
         "user": {
-            "username": user_data["username"],
-            "name": user_data["name"],
-            "email": user_data.get("email", ""),
-            "phone": user_data.get("phone", "")
+            "username": str(user_data["username"]),
+            "name": str(user_data["name"]),
+            "email": str(user_data["email"]) if user_data["email"] else "",
+            "phone": str(user_data["phone"]) if user_data["phone"] else ""
         }
     }
 
@@ -196,8 +200,8 @@ def update_profile(username: str, request: ProfileUpdateRequest):
         raise HTTPException(status_code=404, detail="User not found")
 
     df_users.loc[df_users["username"] == username, "name"] = request.name
-    df_users.loc[df_users["username"] == username, "email"] = request.email
-    df_users.loc[df_users["username"] == username, "phone"] = request.phone
+    df_users.loc[df_users["username"] == username, "email"] = request.email if request.email else ""
+    df_users.loc[df_users["username"] == username, "phone"] = request.phone if request.phone else ""
     df_users.to_csv("users.csv", index=False)
 
     return {
@@ -205,11 +209,10 @@ def update_profile(username: str, request: ProfileUpdateRequest):
         "user": {
             "username": username,
             "name": request.name,
-            "email": request.email,
-            "phone": request.phone
+            "email": request.email if request.email else "",
+            "phone": request.phone if request.phone else ""
         }
     }
-
 
 @app.put("/profile/password/update")
 def update_password(request: PasswordUpdateRequest):
