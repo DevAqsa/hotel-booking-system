@@ -36,6 +36,17 @@ function Wishlist({ user }) {
     }
   };
 
+  const getHotelImage = (name) => {
+    const images = {
+      "Tourist Sunny Apartment": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop",
+      "Snow Palace": "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&h=300&fit=crop",
+      "City Break Inn": "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop",
+      "Ocean View Resort": "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=400&h=300&fit=crop",
+      "Mountain Lodge": "https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=400&h=300&fit=crop"
+    };
+    return images[name] || "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=400&h=300&fit=crop";
+  };
+
   if (loading) return <p className="loading">Loading wishlist...</p>;
 
   return (
@@ -53,22 +64,33 @@ function Wishlist({ user }) {
         <div className="wishlist-grid">
           {wishlist.map((hotel) => (
             <div key={hotel.id} className="wishlist-card">
-              <div className="wishlist-image">🏨</div>
+              <div className="wishlist-image-container">
+                <img
+                  src={getHotelImage(hotel.name)}
+                  alt={hotel.name}
+                  className="wishlist-img"
+                />
+              </div>
               <div className="wishlist-info">
-                <h3>{hotel.name}</h3>
+                <div className="wishlist-header">
+                  <h3>{hotel.name}</h3>
+                  <div className="rating">
+                    <span className="star">★</span>
+                    <span>{hotel.rating}</span>
+                  </div>
+                </div>
                 <p className="city">📍 {hotel.city}</p>
-                <p className="price">${hotel.price_per_night}/night</p>
-                <div className="rating">⭐ {hotel.rating}</div>
+                <p className="price">${hotel.price_per_night}<span>/night</span></p>
               </div>
               <div className="wishlist-actions">
                 <button
-                  className="btn-book"
+                  className="btn-book-wishlist"
                   onClick={() => navigate("/hotels")}
                 >
                   Book Now
                 </button>
                 <button
-                  className="btn-remove"
+                  className="btn-remove-wishlist"
                   onClick={() => handleRemove(hotel.id)}
                 >
                   Remove

@@ -11,7 +11,8 @@ function Navbar({ user, onLogout }) {
   return (
     <nav className="navbar">
       <Link to={user ? "/dashboard" : "/"} className="nav-logo">
-        🏨 HotelBook
+        <span className="logo-icon">🏨</span>
+        <span className="logo-text">Stay<span className="logo-highlight">Ease</span></span>
       </Link>
 
       <div className="nav-links">
